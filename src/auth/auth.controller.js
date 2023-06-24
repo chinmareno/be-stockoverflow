@@ -65,7 +65,8 @@ router.post("/logout", (req, res, next) => {
 router.patch("/change-theme", authMiddleware, async (req, res, next) => {
   try {
     const userId = req.userId;
-    const theme = req.body;
+    const { theme } = req.body;
+    console.log(theme);
     await changeTheme(userId, theme);
     res.status(200).send("theme changed");
   } catch (err) {

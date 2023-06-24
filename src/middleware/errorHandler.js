@@ -19,7 +19,7 @@ const errorHandler = (e, req, res, next) => {
       statuscode = e.statuscode;
       break;
     default:
-      error = "Error occurs";
+      error = "Error occurs:" + e;
       statuscode = 500;
       break;
   }

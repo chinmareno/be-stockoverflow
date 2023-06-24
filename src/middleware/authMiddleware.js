@@ -7,15 +7,19 @@ const authMiddleware = (req, res, next) => {
     jwt.verify(token, process.env.SECRET_KEY, async (err, decodedToken) => {
       if (err) {
         console.log(err);
-        res.send("erorr");
+        res.json({ error: "session has expired" });
       } else {
-        const { id } = await prisma.user.findUnique({
-          where: {
-            id: decodedToken.id,
-          },
-        });
-        req.userId = id;
-        next();
+        try {
+          const { id } = await prisma.user.findUnique({
+            where: {
+              id: decodedToken.id,
+            },
+          });
+          req.userId = id;
+          next();
+        } catch (error) {
+          console.log(error);
+        }
       }
     });
   } else {

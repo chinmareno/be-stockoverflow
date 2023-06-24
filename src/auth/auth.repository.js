@@ -75,7 +75,7 @@ const updateTheme = async (userId, theme) => {
       id: userId,
     },
     data: {
-      theme,
+      theme: theme,
     },
   });
   return user;
