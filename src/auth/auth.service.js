@@ -3,11 +3,12 @@ const UnauthorizedError = require("../errors/UnauthorizedError");
 const { compareHash, hashing } = require("../middleware/hashing");
 const {
   createUser,
-  findUserByPassword,
   findUserByUserName,
   updateUserName,
   updatePassword,
-} = require("./user.repository");
+  updateTheme,
+  findUserById,
+} = require("./auth.repository");
 
 const signup = async (userData) => {
   const { username, password } = userData;
@@ -33,6 +34,12 @@ const login = async (userData) => {
   return data;
 };
 
+const getUserProfile = async (userId) => {
+  const user = await findUserById(userId);
+  const { username, theme } = user;
+  return { username, theme };
+};
+
 const changeUserName = async (userData) => {
   const { username, password, newusername } = userData;
   const user = await updateUserName(username, password, newusername);
@@ -52,9 +59,16 @@ const changePassword = async (userData) => {
   return user;
 };
 
+const changeTheme = async (userId, theme) => {
+  const user = await updateTheme(userId, theme);
+  return user;
+};
+
 module.exports = {
   signup,
   login,
   changeUserName,
   changePassword,
+  changeTheme,
+  getUserProfile,
 };

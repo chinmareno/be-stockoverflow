@@ -16,6 +16,15 @@ const createUser = async (username, password) => {
   return user;
 };
 
+const findUserById = async (userId) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+  return user;
+};
+
 const findUserByUserName = async (username) => {
   const user = await prisma.user.findUnique({
     where: {
@@ -60,6 +69,18 @@ const updatePassword = async (username, password, newpassword) => {
   return user;
 };
 
+const updateTheme = async (userId, theme) => {
+  const user = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      theme,
+    },
+  });
+  return user;
+};
+
 module.exports = {
   createUser,
   findUserByPassword,
@@ -67,4 +88,6 @@ module.exports = {
   updateUserName,
   updatePassword,
   findAll,
+  updateTheme,
+  findUserById,
 };
