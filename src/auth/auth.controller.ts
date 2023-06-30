@@ -1,21 +1,23 @@
 import { NextFunction, Request, Response } from "express";
-import prisma from "../configs/db.config";
-import { authMiddleware, AuthRequest } from "../middleware/authMiddleware";
-import { createToken } from "../middleware/createToken";
+import { authMiddleware, AuthRequest } from "../middleware/authMiddleware.js";
+import { createToken } from "../middleware/createToken.js";
 import express from "express";
-import { findAll } from "./auth.repository";
+import { findAll } from "./auth.repository.js";
 import {
   Theme,
   changeTheme,
   getUserProfile,
   login,
   signup,
-} from "./auth.service";
-import { errorHandler } from "../middleware/errorHandler";
+} from "./auth.service.js";
+import { errorHandler } from "../middleware/errorHandler.js";
+import prisma from "../configs/db.js";
 
 const router = express.Router();
 
 type UserId = string;
+
+const cookieName = process.env.COOKIE_NAME as string;
 
 router.delete("/", async (req: Request, res: Response) => {
   await prisma.user.deleteMany();
@@ -33,7 +35,6 @@ router.get(
     try {
       const userId = req.userId;
       const userProfile = await getUserProfile(userId as UserId);
-      console.log("userProfile");
       res.send(userProfile);
     } catch (err) {
       next(err);
@@ -48,7 +49,10 @@ router.post(
       const userData = req.body;
       const user = await signup(userData);
       const token = createToken(user.id);
-      res.cookie("jwt", token).status(201).send("Account created successfully");
+      res
+        .cookie(cookieName, token)
+        .status(201)
+        .send("Account created successfully");
     } catch (err) {
       next(err);
     }
@@ -61,11 +65,11 @@ router.post(
     try {
       const userData = req.body;
       const user = await login(userData);
-      if (req.cookies.jwt) {
-        res.clearCookie("jwt");
+      if (req.cookies[cookieName]) {
+        res.clearCookie(cookieName);
       }
       const token = createToken(user.id);
-      res.cookie("jwt", token).status(201).send("Login Success");
+      res.cookie(cookieName, token).status(201).send("Login Success");
     } catch (err) {
       next(err);
     }
@@ -73,10 +77,7 @@ router.post(
 );
 
 router.post("/logout", (req: Request, res: Response, next: NextFunction) => {
-  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  res.setHeader("Pragma", "no-cache");
-  res.setHeader("Expires", "0");
-  res.status(200).clearCookie("jwt").send("bye jwt");
+  res.status(200).clearCookie(cookieName).send("bye jwt");
 });
 
 router.patch(
@@ -86,9 +87,8 @@ router.patch(
     try {
       const userId = req.userId;
       const { theme } = req.body;
-      console.log(theme);
-      await changeTheme(userId as UserId, theme);
-      res.status(200).send("theme changed");
+      await changeTheme(userId as UserId, theme as Theme);
+      res.status(200).send("Theme changed");
     } catch (err) {
       next(err);
     }

@@ -1,5 +1,5 @@
-import prisma from "../configs/db.config";
-import { UnauthorizedError } from "../errors";
+import prisma from "../configs/db.js";
+import { UnauthorizedError } from "../errors/index.js";
 
 const findAll = async () => {
   const user = await prisma.user.findMany();

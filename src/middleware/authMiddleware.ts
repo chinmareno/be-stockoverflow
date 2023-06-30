@@ -10,14 +10,15 @@ export const authMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-  const userId = req.cookies.jwt;
+  const userId = req.cookies[process.env.COOKIE_NAME as string];
   if (!userId) {
     res.json({ error: "session expired" });
   }
 
-  const decodedToken = jwt.verify(userId, process.env.SECRET_KEY as Secret);
-
-  req.userId = decodedToken;
+  const decodedToken = jwt.verify(userId, process.env.SECRET_KEY as Secret) as {
+    id: string;
+  };
   console.log(decodedToken);
+  req.userId = decodedToken.id;
   next();
 };

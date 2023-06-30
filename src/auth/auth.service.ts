@@ -6,18 +6,18 @@ import {
   updatePassword,
   updateTheme,
   updateUserName,
-} from "./auth.repository";
+} from "./auth.repository.js";
 import {
   compareHash,
   compareHashPassword,
   hashing,
-} from "../middleware/hashing";
+} from "../middleware/hashing.js";
 import {
   BadRequestError,
   ServerError,
   UnauthorizedError,
   UniqueError,
-} from "../errors";
+} from "../errors/index.js";
 
 export type Theme = "dark" | "light";
 
@@ -43,7 +43,7 @@ interface IUserDataChangePassword {
 const signup = async ({ username, password }: IUserData) => {
   const checkUserame = await findUserByUsername(username);
   if (checkUserame) {
-    throw new UniqueError("Username has been taken.");
+    throw new UniqueError("Username has been taken");
   }
   const hashedPassword = await hashing(password);
   try {
@@ -111,6 +111,7 @@ const changeTheme = async (userId: string, theme: Theme) => {
     const user = await updateTheme(userId, theme);
     return user;
   } catch (error) {
+    console.log(error);
     throw new ServerError("Failed to change theme due to server");
   }
 };

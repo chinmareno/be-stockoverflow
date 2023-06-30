@@ -1,6 +1,6 @@
-import { BadRequestError } from "./BadRequestError";
-import { ServerError } from "./ServerError";
-import { UnauthorizedError } from "./UnauthorizedError";
-import { UniqueError } from "./UniqueError";
+import { BadRequestError } from "./BadRequestError.js";
+import { ServerError } from "./ServerError.js";
+import { UnauthorizedError } from "./UnauthorizedError.js";
+import { UniqueError } from "./UniqueError.js";
 
 export { BadRequestError, UniqueError, ServerError, UnauthorizedError };

@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { UnauthorizedError } from "../errors";
+import { UnauthorizedError } from "../errors/index.js";
 
 const hashing = async (unhashed: string) => {
   const salt = await bcrypt.genSalt();
