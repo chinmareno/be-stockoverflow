@@ -1,7 +1,7 @@
 class BadRequestError extends Error {
   statuscode: number;
   constructor(message: string) {
-    super(message || "Incorrect format");
+    super(message || "Invalid request");
     this.statuscode = 400;
     this.name = "BadRequest Error";
   }

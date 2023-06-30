@@ -1,4 +1,4 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { Theme } from "./auth.service";
 import {
   createUser,
   findUserById,
@@ -18,16 +18,32 @@ import {
   UnauthorizedError,
   UniqueError,
 } from "../errors/index.js";
+import Joi from "joi";
 
-export type Theme = "dark" | "light";
+const usernameSchema = Joi.object({
+  username: Joi.string().min(4).max(20).required(),
+});
+const passwordSchema = Joi.object({
+  password: Joi.string().min(8).max(128).required(),
+});
+
+const userIdSchema = Joi.object({
+  userId: Joi.string().guid({ version: "uuidv4" }).required(),
+});
+
+const themeSchema = Joi.object({
+  theme: Joi.string().valid("light", "dark").required(),
+});
+
+interface IUserData {
+  username: string;
+  password: string;
+}
+type Theme = "light" | "dark";
 
 interface IUserProfile {
   username: string;
   theme: Theme;
-}
-interface IUserData {
-  username: string;
-  password: string;
 }
 interface IUserDataChangeUsername {
   username: string;
@@ -39,8 +55,15 @@ interface IUserDataChangePassword {
   password: string;
   newpassword: string;
 }
-
 const signup = async ({ username, password }: IUserData) => {
+  const { error: errorUsername } = usernameSchema.validate(username);
+  if (errorUsername) {
+    throw new BadRequestError("Invalid username format");
+  }
+  const { error: errorPassword } = passwordSchema.validate(password);
+  if (errorPassword) {
+    throw new BadRequestError("Invalid password format");
+  }
   const checkUserame = await findUserByUsername(username);
   if (checkUserame) {
     throw new UniqueError("Username has been taken");
@@ -55,6 +78,15 @@ const signup = async ({ username, password }: IUserData) => {
 };
 
 const login = async ({ username, password }: IUserData) => {
+  const { error: errorUsername } = usernameSchema.validate(username);
+  if (errorUsername) {
+    throw new BadRequestError("Invalid username format");
+  }
+  const { error: errorPassword } = passwordSchema.validate(password);
+  if (errorPassword) {
+    throw new BadRequestError("Invalid password format");
+  }
+
   const user = await findUserByUsername(username);
   if (!user) {
     throw new UnauthorizedError("Username not found");
@@ -64,16 +96,33 @@ const login = async ({ username, password }: IUserData) => {
 };
 
 const getUserProfile = async (userId: string): Promise<IUserProfile> => {
+  const { error } = userIdSchema.validate(userId);
+  if (error) {
+    throw new BadRequestError("Invalid user id format");
+  }
   const user = await findUserById(userId);
   const { username, theme } = user as IUserProfile;
   return { username, theme };
 };
 
-const changeUserName = async ({
+const changeUsername = async ({
   username,
   password,
   newusername,
 }: IUserDataChangeUsername) => {
+  const { error: errorUsername } = usernameSchema.validate(username);
+  const { error: errorPassword } = passwordSchema.validate(password);
+  const { error: errorNewUsername } = usernameSchema.validate(newusername);
+  if (errorUsername) {
+    throw new BadRequestError("Invalid username format");
+  }
+  if (errorPassword) {
+    throw new BadRequestError("Invalid password format");
+  }
+  if (errorNewUsername) {
+    throw new BadRequestError("Invalid new username format");
+  }
+
   const user = await findUserByUsername(username);
   if (!user) {
     throw new UnauthorizedError("Username incorrect");
@@ -92,6 +141,19 @@ const changePassword = async ({
   password,
   newpassword,
 }: IUserDataChangePassword) => {
+  const { error: errorUsername } = usernameSchema.validate(username);
+  const { error: errorPassword } = passwordSchema.validate(password);
+  const { error: errorNewPassword } = passwordSchema.validate(newpassword);
+  if (errorUsername) {
+    throw new BadRequestError("Invalid username format");
+  }
+  if (errorPassword) {
+    throw new BadRequestError("Invalid password format");
+  }
+  if (errorNewPassword) {
+    throw new BadRequestError("Invalid new password format");
+  }
+
   const user = await findUserByUsername(username);
   if (!user) {
     throw new UnauthorizedError("username incorrect");
@@ -107,11 +169,19 @@ const changePassword = async ({
 };
 
 const changeTheme = async (userId: string, theme: Theme) => {
+  const { error: errorUserId } = userIdSchema.validate(userId);
+  const { error: errorTheme } = themeSchema.validate(theme);
+  if (errorUserId) {
+    throw new BadRequestError("Invalid user id format");
+  }
+  if (errorTheme) {
+    throw new BadRequestError("Invalid theme format");
+  }
+
   try {
     const user = await updateTheme(userId, theme);
     return user;
   } catch (error) {
-    console.log(error);
     throw new ServerError("Failed to change theme due to server");
   }
 };
@@ -119,7 +189,7 @@ const changeTheme = async (userId: string, theme: Theme) => {
 export {
   signup,
   login,
-  changeUserName,
+  changeUsername,
   changePassword,
   changeTheme,
   getUserProfile,
