@@ -1,4 +1,14 @@
-const errorHandler = (e, req, res, next) => {
+import { NextFunction, Response } from "express";
+import { AuthRequest } from "./authMiddleware";
+interface ErrorMiddleware extends Error {
+  statuscode: number;
+}
+const errorHandler = (
+  e: ErrorMiddleware,
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
   let error;
   let statuscode;
   switch (e.name) {
@@ -27,4 +37,4 @@ const errorHandler = (e, req, res, next) => {
   res.status(statuscode).send(error);
 };
 
-module.exports = errorHandler;
+export { errorHandler };

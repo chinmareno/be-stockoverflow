@@ -1,0 +1,6 @@
+{
+  "ext": "ts",
+  "exec": "npx ts-node --esm src/app.ts",
+  "watch": ["src"],
+  "ignore": ["src/**/*.spec.ts"]
+}

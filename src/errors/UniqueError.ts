@@ -1,9 +1,11 @@
 class UniqueError extends Error {
-  constructor(message) {
+  statuscode: number;
+
+  constructor(message: string) {
     super(message || "Must Be Unique");
     this.statuscode = 409;
     this.name = "Unique Error";
   }
 }
 
-module.exports = UniqueError;
+export { UniqueError };
