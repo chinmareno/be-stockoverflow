@@ -17,7 +17,7 @@
     "express": "~4.16.1",
     "express-rate-limit": "^6.7.0",
     "helmet": "^7.0.0",
-    "http-errors": "~1.6.3",
+    "http-errors": "~1.8.1",
     "jade": "~1.11.0",
     "joi": "^17.9.2",
     "jsonwebtoken": "^9.0.0",
