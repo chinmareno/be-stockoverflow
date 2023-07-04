@@ -46,36 +46,12 @@ const findPasswordByUsername = async (username: string) => {
   return user;
 };
 
-const updateUserName = async (username: string, newusername: string) => {
+const updateUsernamePassword = async (username: string, password: string) => {
   const user = await prisma.user.update({
     where: {
       username,
     },
-    data: { username: newusername },
-  });
-  return user;
-};
-
-const updatePassword = async (username: string, newpassword: string) => {
-  const user = await prisma.user.update({
-    where: {
-      username,
-    },
-    data: {
-      password: newpassword,
-    },
-  });
-  return user;
-};
-
-const updateTheme = async (userId: string, theme: "dark" | "light") => {
-  const user = await prisma.user.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      theme: theme,
-    },
+    data: { username, password },
   });
   return user;
 };
@@ -84,9 +60,7 @@ export {
   createUser,
   findPasswordByUsername,
   findUserByUsername,
-  updateUserName,
-  updatePassword,
+  updateUsernamePassword,
   findAll,
-  updateTheme,
   findUserById,
 };
