@@ -26,11 +26,23 @@ router.post("/", authMiddleware, async (req: AuthRequest, res, next) => {
   }
 });
 
+router.patch("/", authMiddleware, async (req: AuthRequest, res, next) => {
+  try {
+    const userId = req.userId as string;
+    const { name, type, length, quantity }: ICreateProduct = req.body;
+    await createProduct({ userId, name, type, length, quantity });
+    res.status(200).send("Product quantity changed");
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.delete("/", authMiddleware, async (req: AuthRequest, res, next) => {
   try {
     const userId = req.userId as string;
     const { name, type, length } = req.body;
     await deleteProduct({ userId, name, type, length });
+    res.status(204).end;
   } catch (error) {
     next(error);
   }

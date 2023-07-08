@@ -3,6 +3,7 @@ import {
   ICreateProduct,
   IDeleteProduct,
   createItemList,
+  deleteItem,
   findItemListByUserId,
 } from "./items.repository.js";
 import { BadRequestError, ServerError } from "../errors/index.js";
@@ -78,6 +79,46 @@ const createProduct = async ({
   }
 };
 
+const updateProduct = async ({
+  userId,
+  name,
+  type,
+  length,
+  quantity,
+}: ICreateProduct) => {
+  const { error: userIdError } = userIdSchema.validate(userId);
+  const { error: nameError } = nameSchema.validate(name);
+  const { error: typeError } = typeSchema.validate(type);
+  const { error: quantityError } = quantitySchema.validate(quantity);
+  const { error: lengthError } = lengthSchema.validate(length);
+  if (userIdError) {
+    throw new BadRequestError("incorrect userId format");
+  }
+  if (nameError) {
+    throw new BadRequestError("incorrect name format");
+  }
+  if (typeError) {
+    throw new BadRequestError("incorrect type format");
+  }
+  if (lengthError) {
+    throw new BadRequestError("incorrect length format");
+  }
+  if (quantityError) {
+    throw new BadRequestError("incorrect quantity format");
+  }
+  try {
+    await createItemList({
+      userId,
+      name: name.toLowerCase(),
+      type: type.toLowerCase(),
+      length,
+      quantity,
+    });
+  } catch (error) {
+    throw new ServerError("Failed to update product quantity due to server");
+  }
+};
+
 const deleteProduct = async ({
   userId,
   name,
@@ -100,7 +141,7 @@ const deleteProduct = async ({
   if (lengthError) {
     throw new BadRequestError("incorrect length format");
   }
-  await deleteProduct({ userId, name, type, length });
+  await deleteItem({ userId, name, type, length });
 };
 
-export { getAllProduct, createProduct, deleteProduct };
+export { getAllProduct, createProduct, deleteProduct, updateProduct };
