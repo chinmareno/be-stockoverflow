@@ -3,7 +3,13 @@ import { authMiddleware, AuthRequest } from "../middleware/authMiddleware.js";
 import { createToken } from "../middleware/createToken.js";
 import express from "express";
 import { findAll } from "./auth.repository.js";
-import { getUserProfile, login, signup } from "./auth.service.js";
+import {
+  changeTheme,
+  getUserProfile,
+  getUserTheme,
+  login,
+  signup,
+} from "./auth.service.js";
 import { errorHandler } from "../middleware/errorHandler.js";
 import prisma from "../configs/db.js";
 
@@ -30,6 +36,20 @@ router.get(
       const userId = req.userId;
       const userProfile = await getUserProfile(userId as UserId);
       res.status(200).send(userProfile);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  "/theme",
+  authMiddleware,
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.userId;
+      const userTheme = await getUserTheme(userId as UserId);
+      res.status(200).send(userTheme);
     } catch (err) {
       next(err);
     }
@@ -76,6 +96,7 @@ router.post("/logout", (req: Request, res: Response, next: NextFunction) => {
 
 router.patch(
   "/change-username-password",
+  authMiddleware,
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const userData = req.body;
@@ -83,6 +104,20 @@ router.patch(
       if (userData) {
         res.send("Change username and password success");
       }
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.patch(
+  "/change-theme",
+  authMiddleware,
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const { theme } = req.body;
+      await changeTheme({ userId: req.userId as string, theme });
+      res.status(200).send("Change theme success");
     } catch (err) {
       next(err);
     }

@@ -56,6 +56,15 @@ const updateUsernamePassword = async (username: string, password: string) => {
   return user;
 };
 
+const updateTheme = async (userId: string, theme: string) => {
+  await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: { theme },
+  });
+};
+
 export {
   createUser,
   findPasswordByUsername,
@@ -63,4 +72,5 @@ export {
   updateUsernamePassword,
   findAll,
   findUserById,
+  updateTheme,
 };

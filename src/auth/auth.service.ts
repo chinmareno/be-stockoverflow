@@ -2,6 +2,7 @@ import {
   createUser,
   findUserById,
   findUserByUsername,
+  updateTheme,
   updateUsernamePassword,
 } from "./auth.repository.js";
 import { compareHashPassword, hashing } from "../middleware/hashing.js";
@@ -23,6 +24,7 @@ interface IUserData {
 }
 interface IUserProfile {
   username: string;
+  theme: string;
 }
 
 const signup = async ({ username, password }: IUserData) => {
@@ -65,7 +67,7 @@ const login = async ({ username, password }: IUserData) => {
   return user;
 };
 
-const getUserProfile = async (userId: string): Promise<IUserProfile> => {
+const getUserProfile = async (userId: string) => {
   const { error } = userIdSchema.validate(userId);
   if (error) {
     throw new BadRequestError("Invalid user id format");
@@ -73,6 +75,16 @@ const getUserProfile = async (userId: string): Promise<IUserProfile> => {
   const user = await findUserById(userId);
   const { username } = user as IUserProfile;
   return { username };
+};
+
+const getUserTheme = async (userId: string) => {
+  const { error } = userIdSchema.validate(userId);
+  if (error) {
+    throw new BadRequestError("Invalid user id format");
+  }
+  const user = await findUserById(userId);
+  const { theme } = user as { theme: string };
+  return { theme };
 };
 
 const changeUsernamePassword = async ({ username, password }: IUserData) => {
@@ -92,4 +104,25 @@ const changeUsernamePassword = async ({ username, password }: IUserData) => {
   }
 };
 
-export { signup, login, changeUsernamePassword, getUserProfile };
+const changeTheme = async ({
+  userId,
+  theme,
+}: {
+  userId: string;
+  theme: string;
+}) => {
+  try {
+    await updateTheme(userId, theme);
+  } catch (error) {
+    throw new ServerError("Failed to change theme due to server");
+  }
+};
+
+export {
+  signup,
+  changeTheme,
+  getUserTheme,
+  login,
+  changeUsernamePassword,
+  getUserProfile,
+};
