@@ -1,6 +1,7 @@
 import Joi from "joi";
 import {
   ICreateProduct,
+  IDeleteProduct,
   createItemList,
   findItemListByUserId,
 } from "./items.repository.js";
@@ -25,15 +26,16 @@ const getAllProduct = async (userId: string) => {
     throw new BadRequestError("incorrect userId format");
   }
   const itemList = await findItemListByUserId(userId);
-  const itemListContainer: IItemListContainer[] = [];
-  const name = itemList?.itemName.map(({ name, itemType }) =>
+  //flattening the itemList
+  const itemListFlattened: IItemListContainer[] = [];
+  itemList?.itemName.map(({ name, itemType }) =>
     itemType.map(({ type, itemLength }) =>
       itemLength.map(({ length, quantity }) =>
-        itemListContainer.push({ name, type, length, quantity })
+        itemListFlattened.push({ name, type, length, quantity })
       )
     )
   );
-  return itemListContainer;
+  return itemListFlattened;
 };
 
 const createProduct = async ({
@@ -64,10 +66,41 @@ const createProduct = async ({
     throw new BadRequestError("incorrect quantity format");
   }
   try {
-    await createItemList({ userId, name, type, length, quantity });
+    await createItemList({
+      userId,
+      name: name.toLowerCase(),
+      type: type.toLowerCase(),
+      length,
+      quantity,
+    });
   } catch (error) {
     throw new ServerError("Failed to create product due to server");
   }
 };
 
-export { getAllProduct, createProduct };
+const deleteProduct = async ({
+  userId,
+  name,
+  type,
+  length,
+}: IDeleteProduct) => {
+  const { error: userIdError } = userIdSchema.validate(userId);
+  const { error: nameError } = nameSchema.validate(name);
+  const { error: typeError } = typeSchema.validate(type);
+  const { error: lengthError } = lengthSchema.validate(length);
+  if (userIdError) {
+    throw new BadRequestError("incorrect userId format");
+  }
+  if (nameError) {
+    throw new BadRequestError("incorrect name format");
+  }
+  if (typeError) {
+    throw new BadRequestError("incorrect type format");
+  }
+  if (lengthError) {
+    throw new BadRequestError("incorrect length format");
+  }
+  await deleteProduct({ userId, name, type, length });
+};
+
+export { getAllProduct, createProduct, deleteProduct };

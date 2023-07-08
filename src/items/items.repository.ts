@@ -1,4 +1,5 @@
 import prisma from "../configs/db.js";
+import { NotFoundError } from "../errors/NotFoundError.js";
 
 export interface ICreateProduct {
   userId: string;
@@ -6,6 +7,12 @@ export interface ICreateProduct {
   type: string;
   length: number;
   quantity: number;
+}
+export interface IDeleteProduct {
+  userId: string;
+  name: string;
+  type: string;
+  length: number;
 }
 
 const findItemListByUserId = async (userId: string) => {
@@ -39,24 +46,61 @@ const createItemList = async ({
     where: { userId },
     create: { userId },
     update: {},
+    select: { id: true },
   });
 
   const { id: itemNameId } = await prisma.itemName.upsert({
     where: { name_itemListId: { itemListId, name } },
     create: { name, itemListId },
     update: {},
+    select: { id: true },
   });
   const { id: itemTypeId } = await prisma.itemType.upsert({
     where: { type_itemNameId: { itemNameId, type } },
     create: { type, itemNameId },
     update: {},
+    select: { id: true },
   });
 
   await prisma.itemLength.upsert({
     where: { length_itemTypeId: { itemTypeId, length } },
     create: { length, itemTypeId, quantity },
     update: {},
+    select: { id: true },
   });
 };
 
-export { findItemListByUserId, createItemList };
+const deleteItem = async ({ userId, name, type, length }: IDeleteProduct) => {
+  const itemList = await prisma.itemList.findUnique({
+    where: { userId },
+    select: { id: true },
+  });
+  if (!itemList) {
+    throw new NotFoundError("userId not found on itemList");
+  }
+
+  const itemName = await prisma.itemName.findUnique({
+    where: { name_itemListId: { itemListId: itemList.id, name } },
+    select: { id: true },
+  });
+  if (!itemName) {
+    throw new NotFoundError("itemListId not found on itemName");
+  }
+
+  const itemType = await prisma.itemType.findUnique({
+    where: { type_itemNameId: { itemNameId: itemName.id, type } },
+    select: { id: true },
+  });
+  if (!itemType) {
+    throw new NotFoundError("itemNameId not found on itemTypeId");
+  }
+  const itemLength = prisma.itemLength.findUnique({
+    where: { length_itemTypeId: { itemTypeId: itemType.id, length } },
+    select: { id: true },
+  });
+  if (!itemLength) {
+    throw new NotFoundError("itemTypeId not found on itemLength");
+  }
+};
+
+export { findItemListByUserId, createItemList, deleteItem };

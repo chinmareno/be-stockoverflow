@@ -1,7 +1,12 @@
 import express from "express";
 import { AuthRequest, authMiddleware } from "../middleware/authMiddleware.js";
-import { createProduct, getAllProduct } from "./items.service.js";
+import {
+  createProduct,
+  deleteProduct,
+  getAllProduct,
+} from "./items.service.js";
 import { ICreateProduct } from "./items.repository.js";
+import { errorHandler } from "../middleware/errorHandler.js";
 
 const router = express.Router();
 
@@ -20,6 +25,18 @@ router.post("/", authMiddleware, async (req: AuthRequest, res, next) => {
     next(error);
   }
 });
+
+router.delete("/", authMiddleware, async (req: AuthRequest, res, next) => {
+  try {
+    const userId = req.userId as string;
+    const { name, type, length } = req.body;
+    await deleteProduct({ userId, name, type, length });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.use(errorHandler);
 
 const itemController = router;
 export { itemController };

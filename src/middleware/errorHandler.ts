@@ -28,6 +28,10 @@ const errorHandler = (
       error = e.message;
       statuscode = e.statuscode;
       break;
+    case "NotFound Error":
+      error = e.message;
+      statuscode = e.statuscode;
+      break;
     default:
       error = "Error occurs:" + e;
       statuscode = 500;
