@@ -11,7 +11,7 @@ model User {
   id           String     @id @default(uuid())
   username     String     @unique
   password     String 
-  image          String    @default("")
+  image          String?
   theme String @default("light")
 }
 
@@ -45,8 +45,10 @@ model ItemLength {
   length Int 
   quantity Int
   itemTypeId String
+  cost Int
+  date String 
   itemType ItemType @relation(references: [id],fields: [itemTypeId])
-  @@unique([length,itemTypeId])
+  @@unique([length,itemTypeId,cost,date])
 }
 
 

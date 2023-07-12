@@ -1,7 +1,9 @@
 import {
   createUser,
+  editUser,
   findUserById,
   findUserByUsername,
+  updateImage,
   updateTheme,
   updateUsernamePassword,
 } from "./auth.repository.js";
@@ -12,12 +14,13 @@ import {
   UnauthorizedError,
   UniqueError,
 } from "../errors/index.js";
-import Joi from "joi";
+import Joi, { string } from "joi";
 
 const userIdSchema = Joi.string().guid({ version: "uuidv4" }).required();
 const usernameSchema = Joi.string().min(4).max(20).required();
 const passwordSchema = Joi.string().min(8).max(128).required();
-
+const themeSchema = Joi.string().valid("dark", "light");
+const imageSchema = Joi.string().required();
 interface IUserData {
   username: string;
   password: string;
@@ -25,6 +28,12 @@ interface IUserData {
 interface IUserProfile {
   username: string;
   theme: string;
+}
+
+export interface IEditAccount {
+  userId: string;
+  username: string;
+  password: string;
 }
 
 const signup = async ({ username, password }: IUserData) => {
@@ -65,6 +74,28 @@ const login = async ({ username, password }: IUserData) => {
   }
   compareHashPassword(password, user.password);
   return user;
+};
+
+const editAccount = async ({ userId, username, password }: IEditAccount) => {
+  const { error: errorUserId } = userIdSchema.validate(userId);
+  const { error: errorUsername } = usernameSchema.validate(username);
+  const { error: errorPassword } = passwordSchema.validate(password);
+  if (errorUserId) {
+    throw new BadRequestError("Invalid userid format");
+  }
+  if (errorUsername) {
+    throw new BadRequestError("Invalid username format");
+  }
+  if (errorPassword) {
+    throw new BadRequestError("Invalid password format");
+  }
+  try {
+    const hashedPassword = await hashing(password);
+
+    await editUser({ userId, username, password: hashedPassword });
+  } catch (error) {
+    throw new ServerError("Failed to edit account due to server");
+  }
 };
 
 const getUserProfile = async (userId: string) => {
@@ -111,10 +142,40 @@ const changeTheme = async ({
   userId: string;
   theme: string;
 }) => {
+  const { error: errorUserId } = userIdSchema.validate(userId);
+  const { error: errorTheme } = themeSchema.validate(theme);
+  if (errorUserId) {
+    throw new BadRequestError("Invalid userid format");
+  }
+  if (errorTheme) {
+    throw new BadRequestError("Invalid theme format");
+  }
   try {
     await updateTheme(userId, theme);
   } catch (error) {
     throw new ServerError("Failed to change theme due to server");
+  }
+};
+
+const changeImage = async ({
+  userId,
+  image,
+}: {
+  userId: string;
+  image: string;
+}) => {
+  const { error: errorUserId } = userIdSchema.validate(userId);
+  const { error: errorImage } = imageSchema.validate(image);
+  if (errorUserId) {
+    throw new BadRequestError("Invalid userid format");
+  }
+  if (errorImage) {
+    throw new BadRequestError("Invalid image format");
+  }
+  try {
+    await updateImage({ userId, image });
+  } catch (error) {
+    throw new ServerError("Failed to change image due to server");
   }
 };
 
@@ -125,4 +186,6 @@ export {
   login,
   changeUsernamePassword,
   getUserProfile,
+  editAccount,
+  changeImage,
 };

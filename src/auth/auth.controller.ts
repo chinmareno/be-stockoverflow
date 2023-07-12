@@ -4,7 +4,9 @@ import { createToken } from "../middleware/createToken.js";
 import express from "express";
 import { findAll } from "./auth.repository.js";
 import {
+  changeImage,
   changeTheme,
+  editAccount,
   getUserProfile,
   getUserTheme,
   login,
@@ -12,7 +14,8 @@ import {
 } from "./auth.service.js";
 import { errorHandler } from "../middleware/errorHandler.js";
 import prisma from "../configs/db.js";
-
+import multer from "multer";
+import { any } from "joi";
 const router = express.Router();
 
 type UserId = string;
@@ -21,6 +24,7 @@ const cookieName = process.env.COOKIE_NAME as string;
 
 router.delete("/", async (req: Request, res: Response) => {
   await prisma.user.deleteMany();
+  res.send("success delete all user");
 });
 
 router.get("/", async (req: Request, res: Response) => {
@@ -99,11 +103,27 @@ router.patch(
   authMiddleware,
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const userData = req.body;
-      await login(userData);
-      if (userData) {
-        res.send("Change username and password success");
-      }
+      const userId = req.userId as string;
+      const { username, password } = req.body;
+      await editAccount({ userId, username, password });
+      res.status(200).send("Change username and password success");
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// this sadasndaksn
+
+router.patch(
+  "/change-image",
+  authMiddleware,
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.userId as string;
+      const image = req.file?.path as string;
+      await changeImage({ userId, image });
+      res.status(200).send("Change image success");
     } catch (err) {
       next(err);
     }

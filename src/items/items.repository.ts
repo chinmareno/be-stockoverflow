@@ -1,5 +1,6 @@
 import prisma from "../configs/db.js";
 import { NotFoundError } from "../errors/NotFoundError.js";
+import { ServerError } from "../errors/ServerError.js";
 
 export interface ICreateProduct {
   userId: string;
@@ -7,13 +8,24 @@ export interface ICreateProduct {
   type: string;
   length: number;
   quantity: number;
+  cost: number;
+  date: any;
 }
 export interface IDeleteProduct {
   userId: string;
   name: string;
   type: string;
   length: number;
+  cost: number;
+  date: string;
 }
+
+const DeleteAllItemList = async (userId: string) => {
+  const itemList = await prisma.itemList.deleteMany({
+    where: { userId },
+  });
+  return itemList;
+};
 
 const findItemListByUserId = async (userId: string) => {
   const itemList = await prisma.itemList.findUnique({
@@ -41,6 +53,8 @@ const createItemList = async ({
   type,
   length,
   quantity,
+  cost,
+  date,
 }: ICreateProduct) => {
   const { id: itemListId } = await prisma.itemList.upsert({
     where: { userId },
@@ -62,14 +76,35 @@ const createItemList = async ({
     select: { id: true },
   });
 
+  const sameDayItem = await prisma.itemLength.findUnique({
+    where: { length_itemTypeId_cost_date: { itemTypeId, length, cost, date } },
+  });
+
+  let quantityAddOrCreate = quantity;
+  if (sameDayItem) {
+    quantityAddOrCreate += sameDayItem.quantity;
+  }
   await prisma.itemLength.upsert({
-    where: { length_itemTypeId: { itemTypeId, length } },
-    create: { length, itemTypeId, quantity },
-    update: { quantity },
+    where: { length_itemTypeId_cost_date: { itemTypeId, length, cost, date } },
+    create: {
+      length,
+      itemTypeId,
+      quantity: quantityAddOrCreate,
+      cost,
+      date,
+    },
+    update: { quantity: quantityAddOrCreate },
   });
 };
 
-const deleteItem = async ({ userId, name, type, length }: IDeleteProduct) => {
+const deleteItem = async ({
+  userId,
+  name,
+  type,
+  length,
+  cost,
+  date,
+}: IDeleteProduct) => {
   const itemList = await prisma.itemList.findUnique({
     where: { userId },
     select: { id: true },
@@ -94,15 +129,30 @@ const deleteItem = async ({ userId, name, type, length }: IDeleteProduct) => {
     throw new NotFoundError("itemNameId not found on itemTypeId");
   }
   const itemLength = await prisma.itemLength.findUnique({
-    where: { length_itemTypeId: { itemTypeId: itemType.id, length } },
+    where: {
+      length_itemTypeId_cost_date: {
+        itemTypeId: itemType.id,
+        length,
+        cost,
+        date,
+      },
+    },
     select: { id: true },
   });
+
   if (!itemLength) {
     throw new NotFoundError("itemTypeId not found on itemLength");
   }
   await prisma.itemLength.delete({
-    where: { length_itemTypeId: { itemTypeId: itemType.id, length } },
+    where: {
+      length_itemTypeId_cost_date: {
+        itemTypeId: itemType.id,
+        length,
+        cost,
+        date,
+      },
+    },
   });
 };
 
-export { findItemListByUserId, createItemList, deleteItem };
+export { findItemListByUserId, createItemList, deleteItem, DeleteAllItemList };

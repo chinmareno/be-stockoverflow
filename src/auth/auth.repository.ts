@@ -1,5 +1,6 @@
 import prisma from "../configs/db.js";
 import { UnauthorizedError } from "../errors/index.js";
+import { IEditAccount } from "./auth.service.js";
 
 const findAll = async () => {
   const user = await prisma.user.findMany();
@@ -14,6 +15,16 @@ const createUser = async (username: string, password: string) => {
     },
   });
   return user;
+};
+
+const editUser = async ({ userId, username, password }: IEditAccount) => {
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      username,
+      password,
+    },
+  });
 };
 
 const findUserById = async (userId: string) => {
@@ -65,6 +76,21 @@ const updateTheme = async (userId: string, theme: string) => {
   });
 };
 
+const updateImage = async ({
+  userId,
+  image,
+}: {
+  userId: string;
+  image: string;
+}) => {
+  await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: { image },
+  });
+};
+
 export {
   createUser,
   findPasswordByUsername,
@@ -73,4 +99,6 @@ export {
   findAll,
   findUserById,
   updateTheme,
+  editUser,
+  updateImage,
 };
