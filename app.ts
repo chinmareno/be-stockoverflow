@@ -2,7 +2,7 @@ import express, { Application, Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
-import { router } from "./routers/index.js";
+import { router } from "./src/routers/index.js";
 import { Server } from "http";
 import { config } from "dotenv";
 import rateLimit from "express-rate-limit";
@@ -21,6 +21,10 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+const PORT: number = Number(process.env.PORT) || 2000;
+const __filename = fileURLToPath(import.meta.url);
+export const __dirname = path.dirname(__filename);
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, callback) => {
@@ -46,10 +50,7 @@ const fileFilter = (
     callback(null, false);
   }
 };
-const PORT: number = Number(process.env.PORT) || 2000;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-console.log(__dirname);
+
 app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 app.use("/images", express.static(path.join(__dirname, "images")));
@@ -62,7 +63,12 @@ app.use(
 );
 app.use(limiter);
 app.use(express.json());
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+  })
+);
+
 app.use(cookieParser());
 app.use(
   cors({

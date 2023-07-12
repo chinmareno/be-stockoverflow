@@ -14,7 +14,9 @@ import {
   UnauthorizedError,
   UniqueError,
 } from "../errors/index.js";
-import Joi, { string } from "joi";
+import Joi from "joi";
+import fs from "fs";
+import { __dirname } from "../../app.js";
 
 const userIdSchema = Joi.string().guid({ version: "uuidv4" }).required();
 const usernameSchema = Joi.string().min(4).max(20).required();
@@ -27,7 +29,7 @@ interface IUserData {
 }
 interface IUserProfile {
   username: string;
-  theme: string;
+  image: string;
 }
 
 export interface IEditAccount {
@@ -98,14 +100,16 @@ const editAccount = async ({ userId, username, password }: IEditAccount) => {
   }
 };
 
-const getUserProfile = async (userId: string) => {
+const getUserProfile = async (
+  userId: string
+): Promise<{ username: string; image: string }> => {
   const { error } = userIdSchema.validate(userId);
   if (error) {
     throw new BadRequestError("Invalid user id format");
   }
   const user = await findUserById(userId);
-  const { username } = user as IUserProfile;
-  return { username };
+  const { username, image } = user as IUserProfile;
+  return { username, image };
 };
 
 const getUserTheme = async (userId: string) => {

@@ -14,8 +14,9 @@ import {
 } from "./auth.service.js";
 import { errorHandler } from "../middleware/errorHandler.js";
 import prisma from "../configs/db.js";
-import multer from "multer";
-import { any } from "joi";
+import { __dirname } from "../../app.js";
+import fs from "fs";
+
 const router = express.Router();
 
 type UserId = string;
@@ -113,14 +114,16 @@ router.patch(
   }
 );
 
-// this sadasndaksn
-
 router.patch(
   "/change-image",
   authMiddleware,
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const userId = req.userId as string;
+      //Delete old image
+      const { image: oldImage } = await getUserProfile(userId);
+      fs.unlinkSync(__dirname + "/" + oldImage);
+      //Put new image
       const image = req.file?.path as string;
       await changeImage({ userId, image });
       res.status(200).send("Change image success");
