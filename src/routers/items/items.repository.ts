@@ -1,6 +1,5 @@
-import prisma from "../configs/db.js";
-import { NotFoundError } from "../errors/NotFoundError.js";
-import { ServerError } from "../errors/ServerError.js";
+import prisma from "../../configs/db.js";
+import { NotFoundError } from "../../errors/NotFoundError.js";
 
 export interface ICreateProduct {
   userId: string;
@@ -10,6 +9,7 @@ export interface ICreateProduct {
   quantity: number;
   cost: number;
   date: any;
+  editStock: boolean;
 }
 export interface IDeleteProduct {
   userId: string;
@@ -55,6 +55,7 @@ const createItemList = async ({
   quantity,
   cost,
   date,
+  editStock,
 }: ICreateProduct) => {
   const { id: itemListId } = await prisma.itemList.upsert({
     where: { userId },
@@ -82,7 +83,9 @@ const createItemList = async ({
 
   let quantityAddOrCreate = quantity;
   if (sameDayItem) {
-    quantityAddOrCreate += sameDayItem.quantity;
+    if (!editStock) {
+      quantityAddOrCreate += sameDayItem.quantity;
+    }
   }
   await prisma.itemLength.upsert({
     where: { length_itemTypeId_cost_date: { itemTypeId, length, cost, date } },

@@ -6,16 +6,16 @@ import {
   deleteItem,
   findItemListByUserId,
 } from "./items.repository.js";
-import { BadRequestError, ServerError } from "../errors/index.js";
-import toLocaleDate from "../helper/toLocaleDate.js";
+import { BadRequestError, ServerError } from "../../errors/index.js";
+import toLocaleDate from "../../helper/toLocaleDate.js";
 
-const userIdSchema = Joi.string().guid({ version: "uuidv4" }).required();
-const nameSchema = Joi.string().required();
-const typeSchema = Joi.string().required();
-const lengthSchema = Joi.number().positive().required();
-const quantitySchema = Joi.number().positive().required();
-const costSchema = Joi.number().positive().required();
-const dateSchema = Joi.date().required();
+export const userIdSchema = Joi.string().guid({ version: "uuidv4" }).required();
+export const nameSchema = Joi.string().required();
+export const typeSchema = Joi.string().required();
+export const lengthSchema = Joi.number().positive().required();
+export const quantitySchema = Joi.number().positive().required();
+export const costSchema = Joi.number().positive().required();
+export const dateSchema = Joi.date().required();
 
 interface IItemListContainer {
   name: string;
@@ -59,6 +59,7 @@ const createProduct = async ({
   quantity,
   cost,
   date,
+  editStock,
 }: ICreateProduct) => {
   const { error: userIdError } = userIdSchema.validate(userId);
   const { error: nameError } = nameSchema.validate(name);
@@ -99,6 +100,7 @@ const createProduct = async ({
     quantity,
     cost,
     date: localeDate,
+    editStock,
   });
 };
 
@@ -110,6 +112,7 @@ const updateProduct = async ({
   quantity,
   cost,
   date,
+  editStock,
 }: ICreateProduct) => {
   const { error: userIdError } = userIdSchema.validate(userId);
   const { error: nameError } = nameSchema.validate(name);
@@ -150,6 +153,7 @@ const updateProduct = async ({
       quantity,
       cost,
       date: localeDate,
+      editStock,
     });
   } catch (error) {
     throw new ServerError("Failed to update product quantity due to server");

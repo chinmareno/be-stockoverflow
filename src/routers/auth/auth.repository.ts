@@ -1,5 +1,5 @@
-import prisma from "../configs/db.js";
-import { UnauthorizedError } from "../errors/index.js";
+import prisma from "../../configs/db.js";
+import { UnauthorizedError } from "../../errors/index.js";
 import { IEditAccount } from "./auth.service.js";
 
 const findAll = async () => {

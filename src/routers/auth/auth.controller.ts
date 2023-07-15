@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { authMiddleware, AuthRequest } from "../middleware/authMiddleware.js";
-import { createToken } from "../middleware/createToken.js";
+import {
+  authMiddleware,
+  AuthRequest,
+} from "../../middleware/authMiddleware.js";
+import { createToken } from "../../middleware/createToken.js";
 import express from "express";
 import { findAll } from "./auth.repository.js";
 import {
@@ -12,9 +15,9 @@ import {
   login,
   signup,
 } from "./auth.service.js";
-import { errorHandler } from "../middleware/errorHandler.js";
-import prisma from "../configs/db.js";
-import { __dirname } from "../../app.js";
+import { errorHandler } from "../../middleware/errorHandler.js";
+import prisma from "../../configs/db.js";
+import { __dirname } from "../../../app.js";
 import fs from "fs";
 
 const router = express.Router();
@@ -122,8 +125,10 @@ router.patch(
       const userId = req.userId as string;
       //Delete old image
       const { image: oldImage } = await getUserProfile(userId);
-      fs.unlinkSync(__dirname + "/" + oldImage);
-      //Put new image
+      if (oldImage) {
+        fs.unlinkSync(__dirname + "/" + oldImage);
+      }
+      // //Put new image
       const image = req.file?.path as string;
       await changeImage({ userId, image });
       res.status(200).send("Change image success");

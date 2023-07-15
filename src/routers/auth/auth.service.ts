@@ -7,16 +7,16 @@ import {
   updateTheme,
   updateUsernamePassword,
 } from "./auth.repository.js";
-import { compareHashPassword, hashing } from "../middleware/hashing.js";
+import { compareHashPassword, hashing } from "../../middleware/hashing.js";
 import {
   BadRequestError,
   ServerError,
   UnauthorizedError,
   UniqueError,
-} from "../errors/index.js";
+} from "../../errors/index.js";
 import Joi from "joi";
 import fs from "fs";
-import { __dirname } from "../../app.js";
+import { __dirname } from "../../../app.js";
 
 const userIdSchema = Joi.string().guid({ version: "uuidv4" }).required();
 const usernameSchema = Joi.string().min(4).max(20).required();

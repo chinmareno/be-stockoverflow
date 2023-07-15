@@ -51,4 +51,29 @@ model ItemLength {
   @@unique([length,itemTypeId,cost,date])
 }
 
+model Invoice{
+  id          String    @id @default(cuid())
+  userId String 
+ date String
+ seller String
+ buyer String
+ invoiceItem InvoiceItem[]
+ totalPrice Int
+ @@unique([id,userId])
+
+ 
+ 
+}
+model InvoiceItem{
+  id          String    @id @default(cuid())
+  invoice   Invoice @relation(references: [id],fields: [invoiceId],onDelete: Cascade)
+  invoiceId  String
+  userId String
+  name String
+  type String
+  length Int
+  price Int
+  quantity Int
+  @@unique([invoiceId,userId])
+}
 
