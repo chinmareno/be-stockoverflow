@@ -13,6 +13,7 @@ model User {
   password     String 
   image        String @default("")
   theme String @default("light")
+  seller String @default("")
 }
 
 model ItemList{
@@ -51,19 +52,24 @@ model ItemLength {
   @@unique([length,itemTypeId,cost,date])
 }
 
-model Invoice{
+enum PaidStatus {
+  PAID
+  UNPAID
+ }
+model Invoice {
   id          String    @id @default(cuid())
   userId String 
+  paidStatus PaidStatus
  date String
  seller String
  buyer String
  invoiceItem InvoiceItem[]
  totalPrice Int
  @@unique([id,userId])
-
- 
- 
 }
+ 
+ 
+
 model InvoiceItem{
   id          String    @id @default(cuid())
   invoice   Invoice @relation(references: [id],fields: [invoiceId],onDelete: Cascade)
@@ -74,6 +80,6 @@ model InvoiceItem{
   length Int
   price Int
   quantity Int
-  @@unique([invoiceId,userId])
+  @@unique([invoiceId,userId,id])
 }
 

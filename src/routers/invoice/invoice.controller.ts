@@ -1,6 +1,11 @@
 import express from "express";
 import { AuthRequest } from "../../middleware/authMiddleware.js";
-import { getInvoices, makeInvoice, removeInvoice } from "./invoice.service.js";
+import {
+  getInvoices,
+  getUnpaidInvoices,
+  makeInvoice,
+  removeInvoice,
+} from "./invoice.service.js";
 import { ICreateInvoice, getAllInvoice } from "./invoice.repository.js";
 import { errorHandler } from "../../middleware/errorHandler.js";
 
@@ -10,7 +15,6 @@ router.get("/", async (req: AuthRequest, res, next) => {
   try {
     const userId = req.userId as string;
     const invoices = await getAllInvoice(userId);
-    console.log(invoices);
     res.status(200).send(invoices);
   } catch (error) {
     next(error);
@@ -29,13 +33,36 @@ router.get("/:date", async (req: AuthRequest, res, next) => {
   }
 });
 
+router.get("/unpaid", async (req: AuthRequest, res, next) => {
+  try {
+    const userId = req.userId as string;
+    const unpaidInvoices = await getUnpaidInvoices(userId);
+    res.status(200).send(unpaidInvoices);
+  } catch (error) {
+    next(error);
+  }
+});
 router.post("/", async (req: AuthRequest, res, next) => {
   try {
     const userId = req.userId as string;
-    const { buyer, date, invoiceItem, seller, totalPrice }: ICreateInvoice =
-      req.body;
+    const {
+      buyer,
+      date,
+      invoiceItem,
+      seller,
+      totalPrice,
+      paidStatus,
+    }: ICreateInvoice = req.body;
 
-    await makeInvoice({ buyer, date, invoiceItem, seller, totalPrice, userId });
+    await makeInvoice({
+      buyer,
+      date,
+      invoiceItem,
+      seller,
+      totalPrice,
+      userId,
+      paidStatus,
+    });
     res.status(201).send("Invoice created successfully");
   } catch (error) {
     next(error);

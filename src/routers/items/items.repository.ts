@@ -47,6 +47,18 @@ const findItemListByUserId = async (userId: string) => {
   return itemList;
 };
 
+const updateSellerByUserId = async ({
+  userId,
+  seller,
+}: {
+  userId: string;
+  seller: string;
+}) => {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { seller: seller },
+  });
+};
 const createItemList = async ({
   userId,
   name,
@@ -158,4 +170,10 @@ const deleteItem = async ({
   });
 };
 
-export { findItemListByUserId, createItemList, deleteItem, DeleteAllItemList };
+export {
+  updateSellerByUserId,
+  findItemListByUserId,
+  createItemList,
+  deleteItem,
+  DeleteAllItemList,
+};

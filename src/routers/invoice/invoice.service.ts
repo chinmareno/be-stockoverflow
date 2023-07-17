@@ -4,6 +4,7 @@ import {
   IDeleteInvoice,
   deleteInvoice,
   getInvoiceByDate,
+  getUnpaidInvoicesByUserId,
 } from "./invoice.repository.js";
 import {
   costSchema,
@@ -12,6 +13,7 @@ import {
 } from "../items/items.service.js";
 import { BadRequestError } from "../../errors/index.js";
 import { IGetInvoiceByDate } from "./invoice.repository.js";
+import { updateSellerByUserId } from "../items/items.repository.js";
 
 const idSchema = Joi.string().required();
 const buyerSchema = Joi.string().required();
@@ -24,6 +26,7 @@ const singleInvoiceItemSchema = Joi.object({
   quantity: Joi.number().positive().required(),
 });
 const invoiceItemSchema = Joi.array().items(singleInvoiceItemSchema);
+const stringSchema = Joi.string().required();
 
 type InvoiceItem = {
   name: string;
@@ -39,6 +42,7 @@ interface IMakeInvoice {
   buyer: string;
   invoiceItem: InvoiceItem[];
   totalPrice: number;
+  paidStatus: "PAID" | "UNPAID";
 }
 const makeInvoice = async ({
   userId,
@@ -47,6 +51,7 @@ const makeInvoice = async ({
   seller,
   totalPrice,
   invoiceItem,
+  paidStatus,
 }: IMakeInvoice) => {
   const { error: userIdError } = userIdSchema.validate(userId);
   const { error: dateError } = dateSchema.validate(date);
@@ -82,6 +87,7 @@ const makeInvoice = async ({
   if (invoiceItemError) {
     throw new BadRequestError("incorrect invoice item format");
   }
+  await updateSellerByUserId({ userId, seller });
   await createInvoice({
     userId,
     buyer,
@@ -89,6 +95,7 @@ const makeInvoice = async ({
     date,
     totalPrice,
     invoiceItem: invoicesItemForRepo,
+    paidStatus,
   });
 };
 
@@ -104,8 +111,17 @@ const removeInvoice = async ({ id, userId }: IDeleteInvoice) => {
   await deleteInvoice({ id, userId });
 };
 
+const getUnpaidInvoices = async (userId: string) => {
+  const { error } = userIdSchema.validate(userId);
+  if (error) {
+    throw new BadRequestError("Incorrect user id format");
+  }
+  const unpaidInvoices = await getUnpaidInvoicesByUserId(userId);
+  return unpaidInvoices;
+};
+
 const getInvoices = async ({ date, userId }: IGetInvoiceByDate) => {
-  const { error: dateError } = dateSchema.validate(date);
+  const { error: dateError } = stringSchema.validate(date);
   const { error: userIdError } = userIdSchema.validate(userId);
   if (userIdError) {
     throw new BadRequestError("incorrect user id format");
@@ -117,4 +133,4 @@ const getInvoices = async ({ date, userId }: IGetInvoiceByDate) => {
   return invoices;
 };
 
-export { makeInvoice, removeInvoice, getInvoices };
+export { makeInvoice, removeInvoice, getInvoices, getUnpaidInvoices };

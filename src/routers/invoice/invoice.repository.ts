@@ -15,6 +15,7 @@ export interface ICreateInvoice {
   buyer: string;
   invoiceItem: InvoiceItem[];
   totalPrice: number;
+  paidStatus: "PAID" | "UNPAID";
 }
 export interface IGetInvoiceByDate {
   userId: string;
@@ -31,6 +32,7 @@ const createInvoice = async ({
   buyer,
   invoiceItem,
   totalPrice,
+  paidStatus,
 }: ICreateInvoice) => {
   const { id: invoiceId } = await prisma.invoice.create({
     data: {
@@ -39,6 +41,7 @@ const createInvoice = async ({
       seller,
       buyer,
       totalPrice,
+      paidStatus,
     },
   });
   await prisma.invoiceItem.createMany({
@@ -63,9 +66,17 @@ const getAllInvoice = async (userId: string) => {
   });
 };
 
+const getUnpaidInvoicesByUserId = async (userId: string) => {
+  return await prisma.invoice.findMany({
+    where: { userId, paidStatus: "UNPAID" },
+    include: { invoiceItem: true },
+  });
+};
+
 const getInvoiceByDate = async ({ userId, date }: IGetInvoiceByDate) => {
   const invoices = await prisma.invoice.findMany({
     where: { userId, date },
+    include: { invoiceItem: true },
   });
 
   if (invoices.length === 0) {
@@ -77,4 +88,11 @@ const getInvoiceByDate = async ({ userId, date }: IGetInvoiceByDate) => {
 const deleteInvoice = async ({ id, userId }: IDeleteInvoice) => {
   await prisma.invoice.delete({ where: { id_userId: { id, userId } } });
 };
-export { createInvoice, getInvoiceByDate, deleteInvoice, getAllInvoice };
+
+export {
+  createInvoice,
+  getInvoiceByDate,
+  deleteInvoice,
+  getAllInvoice,
+  getUnpaidInvoicesByUserId,
+};
