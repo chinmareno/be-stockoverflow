@@ -47,9 +47,8 @@ model ItemLength {
   quantity Int
   itemTypeId String
   cost Int
-  date String 
   itemType ItemType @relation(references: [id],fields: [itemTypeId])
-  @@unique([length,itemTypeId,cost,date])
+  @@unique([length,itemTypeId,cost])
 }
 
 enum PaidStatus {
@@ -83,3 +82,21 @@ model InvoiceItem{
   @@unique([invoiceId,userId,id])
 }
 
+model Profit{
+  id String @id @default(cuid())
+  userId String
+  date String
+  profitItem ProfitItem[]
+  @@unique([userId,date])
+
+}
+
+model ProfitItem {
+    id          String    @id @default(cuid())
+profit Profit @relation(references: [id],fields: [profitId])
+name String
+  type String
+  totalProfit Int
+profitId String
+@@unique([profitId,name,type])
+}

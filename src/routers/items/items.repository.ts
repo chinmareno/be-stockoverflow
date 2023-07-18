@@ -8,8 +8,14 @@ export interface ICreateProduct {
   length: number;
   quantity: number;
   cost: number;
-  date: any;
   editStock: boolean;
+}
+export interface IDecreaseItemQuantity {
+  userId: string;
+  name: string;
+  type: string;
+  length: number;
+  quantity: number;
 }
 export interface IDeleteProduct {
   userId: string;
@@ -17,7 +23,6 @@ export interface IDeleteProduct {
   type: string;
   length: number;
   cost: number;
-  date: string;
 }
 
 const DeleteAllItemList = async (userId: string) => {
@@ -38,10 +43,8 @@ const findItemListByUserId = async (userId: string) => {
               itemLength: true,
             },
           },
-          // Include other nested relationships within itemName
         },
       },
-      // Include other nested relationships within itemList
     },
   });
   return itemList;
@@ -66,7 +69,6 @@ const createItemList = async ({
   length,
   quantity,
   cost,
-  date,
   editStock,
 }: ICreateProduct) => {
   const { id: itemListId } = await prisma.itemList.upsert({
@@ -90,7 +92,7 @@ const createItemList = async ({
   });
 
   const sameDayItem = await prisma.itemLength.findUnique({
-    where: { length_itemTypeId_cost_date: { itemTypeId, length, cost, date } },
+    where: { length_itemTypeId_cost: { itemTypeId, length, cost } },
   });
 
   let quantityAddOrCreate = quantity;
@@ -100,13 +102,12 @@ const createItemList = async ({
     }
   }
   await prisma.itemLength.upsert({
-    where: { length_itemTypeId_cost_date: { itemTypeId, length, cost, date } },
+    where: { length_itemTypeId_cost: { itemTypeId, length, cost } },
     create: {
       length,
       itemTypeId,
       quantity: quantityAddOrCreate,
       cost,
-      date,
     },
     update: { quantity: quantityAddOrCreate },
   });
@@ -118,7 +119,6 @@ const deleteItem = async ({
   type,
   length,
   cost,
-  date,
 }: IDeleteProduct) => {
   const itemList = await prisma.itemList.findUnique({
     where: { userId },
@@ -145,11 +145,10 @@ const deleteItem = async ({
   }
   const itemLength = await prisma.itemLength.findUnique({
     where: {
-      length_itemTypeId_cost_date: {
+      length_itemTypeId_cost: {
         itemTypeId: itemType.id,
         length,
         cost,
-        date,
       },
     },
     select: { id: true },
@@ -160,13 +159,63 @@ const deleteItem = async ({
   }
   await prisma.itemLength.delete({
     where: {
-      length_itemTypeId_cost_date: {
+      length_itemTypeId_cost: {
         itemTypeId: itemType.id,
         length,
         cost,
-        date,
       },
     },
+  });
+};
+
+const decreaseItemQuantity = async ({
+  userId,
+  name,
+  type,
+  length,
+  quantity,
+}: IDecreaseItemQuantity) => {
+  const { id: itemListId } = await prisma.itemList.upsert({
+    where: { userId },
+    create: { userId },
+    update: {},
+    select: { id: true },
+  });
+
+  const { id: itemNameId } = await prisma.itemName.upsert({
+    where: { name_itemListId: { itemListId, name } },
+    create: { name, itemListId },
+    update: {},
+    select: { id: true },
+  });
+  const { id: itemTypeId } = await prisma.itemType.upsert({
+    where: { type_itemNameId: { itemNameId, type } },
+    create: { type, itemNameId },
+    update: {},
+    select: { id: true },
+  });
+
+  let selectedItem = await prisma.itemLength.findFirst({
+    where: { itemTypeId, length },
+  });
+
+  let quantityNeeded = quantity;
+  while (selectedItem.quantity < quantityNeeded) {
+    await prisma.itemLength.delete({ where: { id: selectedItem.id } });
+    quantityNeeded -= selectedItem.quantity;
+    selectedItem = await prisma.itemLength.findFirst({
+      where: { itemTypeId, length },
+    });
+  }
+  if (selectedItem.quantity == quantityNeeded) {
+    await prisma.itemLength.delete({
+      where: { id: selectedItem.id },
+    });
+    return;
+  }
+  await prisma.itemLength.update({
+    where: { id: selectedItem.id },
+    data: { quantity: selectedItem.quantity - quantityNeeded },
   });
 };
 
@@ -176,4 +225,5 @@ export {
   createItemList,
   deleteItem,
   DeleteAllItemList,
+  decreaseItemQuantity,
 };

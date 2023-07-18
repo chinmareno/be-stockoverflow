@@ -1,8 +1,5 @@
 import express from "express";
-import {
-  AuthRequest,
-  authMiddleware,
-} from "../../middleware/authMiddleware.js";
+import { AuthRequest } from "../../middleware/authMiddleware.js";
 import {
   createProduct,
   deleteProduct,
@@ -31,7 +28,6 @@ router.post("/", async (req: AuthRequest, res, next) => {
       length,
       quantity,
       cost,
-      date,
       editStock = false,
     }: ICreateProduct = req.body;
     await createProduct({
@@ -41,7 +37,6 @@ router.post("/", async (req: AuthRequest, res, next) => {
       length,
       quantity,
       cost,
-      date,
       editStock,
     });
     res.status(201).send("New product created");
@@ -59,17 +54,15 @@ router.patch("/", async (req: AuthRequest, res, next) => {
       length,
       quantity,
       cost,
-      date,
       editStock = false,
     }: ICreateProduct = req.body;
     await createProduct({
       userId,
       name,
       type,
-      length,
-      quantity,
-      cost,
-      date,
+      length: Number(length),
+      quantity: Number(quantity),
+      cost: Number(cost),
       editStock,
     });
     res.status(200).send("Product quantity changed");
@@ -87,14 +80,13 @@ router.post("/delete", async (req: AuthRequest, res, next) => {
 router.delete("/", async (req: AuthRequest, res, next) => {
   try {
     const userId = req.userId as string;
-    const { name, type, length, cost, date } = req.query as any;
+    const { name, type, length, cost } = req.query as any;
     await deleteProduct({
       userId,
       name,
       type,
       length: parseInt(length),
       cost: parseInt(cost),
-      date,
     });
     res.status(204).end();
   } catch (error) {

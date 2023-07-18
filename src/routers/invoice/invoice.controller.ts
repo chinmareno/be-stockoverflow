@@ -1,6 +1,7 @@
 import express from "express";
 import { AuthRequest } from "../../middleware/authMiddleware.js";
 import {
+  changePaidStatus,
   getInvoices,
   getUnpaidInvoices,
   makeInvoice,
@@ -64,6 +65,17 @@ router.post("/", async (req: AuthRequest, res, next) => {
       paidStatus,
     });
     res.status(201).send("Invoice created successfully");
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch("/", async (req: AuthRequest, res, next) => {
+  try {
+    const userId = req.userId as string;
+    const { invoiceId, paidStatus } = req.body;
+    await changePaidStatus({ invoiceId, paidStatus, userId });
+    res.status(200).send("Paid status changed successfully");
   } catch (error) {
     next(error);
   }

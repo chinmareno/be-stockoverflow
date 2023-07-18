@@ -1,5 +1,4 @@
 import prisma from "../../configs/db.js";
-import { NotFoundError } from "../../errors/index.js";
 
 type InvoiceItem = {
   name: string;
@@ -66,6 +65,21 @@ const getAllInvoice = async (userId: string) => {
   });
 };
 
+const updatePaidStatus = async ({
+  userId,
+  invoiceId,
+  paidStatus,
+}: {
+  userId: string;
+  invoiceId: string;
+  paidStatus: "PAID" | "UNPAID";
+}) => {
+  await prisma.invoice.update({
+    where: { id_userId: { id: invoiceId, userId } },
+    data: { paidStatus },
+  });
+};
+
 const getUnpaidInvoicesByUserId = async (userId: string) => {
   return await prisma.invoice.findMany({
     where: { userId, paidStatus: "UNPAID" },
@@ -78,10 +92,6 @@ const getInvoiceByDate = async ({ userId, date }: IGetInvoiceByDate) => {
     where: { userId, date },
     include: { invoiceItem: true },
   });
-
-  if (invoices.length === 0) {
-    throw new NotFoundError("Invoices with that userId and date not found");
-  }
   return invoices;
 };
 
@@ -95,4 +105,5 @@ export {
   deleteInvoice,
   getAllInvoice,
   getUnpaidInvoicesByUserId,
+  updatePaidStatus,
 };

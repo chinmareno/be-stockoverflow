@@ -7,7 +7,6 @@ import {
   findItemListByUserId,
 } from "./items.repository.js";
 import { BadRequestError, ServerError } from "../../errors/index.js";
-import toLocaleDate from "../../helper/toLocaleDate.js";
 
 export const userIdSchema = Joi.string().guid({ version: "uuidv4" }).required();
 export const nameSchema = Joi.string().required();
@@ -15,7 +14,6 @@ export const typeSchema = Joi.string().required();
 export const lengthSchema = Joi.number().positive().required();
 export const quantitySchema = Joi.number().positive().required();
 export const costSchema = Joi.number().positive().required();
-export const dateSchema = Joi.date().required();
 
 interface IItemListContainer {
   name: string;
@@ -23,7 +21,6 @@ interface IItemListContainer {
   length: number;
   quantity: number;
   cost: number;
-  date: string | Date;
 }
 
 const getAllProduct = async (userId: string) => {
@@ -36,14 +33,13 @@ const getAllProduct = async (userId: string) => {
   const itemListFlattened: IItemListContainer[] = [];
   itemList?.itemName.map(({ name, itemType }) =>
     itemType.map(({ type, itemLength }) =>
-      itemLength.map(({ length, quantity, cost, date }) => {
+      itemLength.map(({ length, quantity, cost }) => {
         itemListFlattened.push({
           name,
           type,
           length,
           quantity,
           cost,
-          date,
         });
       })
     )
@@ -58,7 +54,6 @@ const createProduct = async ({
   length,
   quantity,
   cost,
-  date,
   editStock,
 }: ICreateProduct) => {
   const { error: userIdError } = userIdSchema.validate(userId);
@@ -67,7 +62,6 @@ const createProduct = async ({
   const { error: quantityError } = quantitySchema.validate(quantity);
   const { error: lengthError } = lengthSchema.validate(length);
   const { error: costError } = costSchema.validate(cost);
-  const { error: dateError } = dateSchema.validate(date);
 
   if (userIdError) {
     throw new BadRequestError("incorrect userId format");
@@ -87,10 +81,6 @@ const createProduct = async ({
   if (quantityError) {
     throw new BadRequestError("incorrect quantity format");
   }
-  if (dateError) {
-    throw new BadRequestError("incorrect date format");
-  }
-  const localeDate = toLocaleDate(date);
 
   await createItemList({
     userId,
@@ -99,7 +89,6 @@ const createProduct = async ({
     length,
     quantity,
     cost,
-    date: localeDate,
     editStock,
   });
 };
@@ -111,7 +100,6 @@ const updateProduct = async ({
   length,
   quantity,
   cost,
-  date,
   editStock,
 }: ICreateProduct) => {
   const { error: userIdError } = userIdSchema.validate(userId);
@@ -119,7 +107,6 @@ const updateProduct = async ({
   const { error: typeError } = typeSchema.validate(type);
   const { error: quantityError } = quantitySchema.validate(quantity);
   const { error: lengthError } = lengthSchema.validate(length);
-  const { error: dateError } = dateSchema.validate(date);
   const { error: costError } = costSchema.validate(cost);
   if (userIdError) {
     throw new BadRequestError("incorrect userId format");
@@ -139,10 +126,6 @@ const updateProduct = async ({
   if (costError) {
     throw new BadRequestError("incorrect cost format");
   }
-  if (dateError) {
-    throw new BadRequestError("incorrect date format");
-  }
-  const localeDate = toLocaleDate(date);
 
   try {
     await createItemList({
@@ -152,7 +135,6 @@ const updateProduct = async ({
       length,
       quantity,
       cost,
-      date: localeDate,
       editStock,
     });
   } catch (error) {
@@ -166,14 +148,12 @@ const deleteProduct = async ({
   type,
   length,
   cost,
-  date,
 }: IDeleteProduct) => {
   const { error: userIdError } = userIdSchema.validate(userId);
   const { error: nameError } = nameSchema.validate(name);
   const { error: typeError } = typeSchema.validate(type);
   const { error: lengthError } = lengthSchema.validate(length);
   const { error: costError } = costSchema.validate(cost);
-  const { error: dateError } = dateSchema.validate(date);
   if (userIdError) {
     throw new BadRequestError("incorrect userId format");
   }
@@ -186,15 +166,11 @@ const deleteProduct = async ({
   if (lengthError) {
     throw new BadRequestError("incorrect length format");
   }
-  if (dateError) {
-    throw new BadRequestError("incorrect date format");
-  }
   if (costError) {
     throw new BadRequestError("incorrect cost format");
   }
-  const localeDate = toLocaleDate(date);
 
-  await deleteItem({ userId, name, type, length, cost, date: localeDate });
+  await deleteItem({ userId, name, type, length, cost });
 };
 
 export { getAllProduct, createProduct, deleteProduct, updateProduct };
