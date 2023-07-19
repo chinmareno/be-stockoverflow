@@ -7,7 +7,16 @@ import {
 } from "./profit.repository.js";
 import Joi from "joi";
 
-interface IChangeProfit extends IAddProfit {}
+type ProfitItem = {
+  name: string;
+  type: string;
+  totalProfit: number;
+};
+interface IChangeProfit {
+  date: string;
+  userId: string;
+  profitItem: ProfitItem;
+}
 
 const stringSchema = Joi.string().required();
 const numberSchema = Joi.number().positive().required();

@@ -9,6 +9,12 @@ export interface IAddProfit {
   date: string;
   userId: string;
   profitItem: ProfitItem;
+  totalCost: number;
+}
+export interface IEditProfit {
+  date: string;
+  userId: string;
+  profitItem: ProfitItem;
 }
 
 export interface IGetProfileByMonth {
@@ -23,7 +29,12 @@ const getProfitByMonth = async ({ date, userId }: IGetProfileByMonth) => {
   });
 };
 
-const addProfit = async ({ profitItem, userId, date }: IAddProfit) => {
+const addProfit = async ({
+  profitItem,
+  userId,
+  date,
+  totalCost,
+}: IAddProfit) => {
   const { id: profitId } = await prisma.profit.upsert({
     where: { userId_date: { date, userId } },
     create: { date, userId },
@@ -32,8 +43,8 @@ const addProfit = async ({ profitItem, userId, date }: IAddProfit) => {
   const { name, totalProfit, type } = profitItem;
   await prisma.profitItem.upsert({
     where: { profitId_name_type: { name, profitId, type } },
-    create: { name, totalProfit, type, profitId },
-    update: { totalProfit: { increment: totalProfit } },
+    create: { name, totalProfit: totalProfit - totalCost, type, profitId },
+    update: { totalProfit: { increment: totalProfit - totalCost } },
   });
 };
 
@@ -41,7 +52,7 @@ const getAllProfit = async () => {
   return await prisma.profit.findMany({ include: { profitItem: true } });
 };
 
-const editProfit = async ({ profitItem, userId, date }: IAddProfit) => {
+const editProfit = async ({ profitItem, userId, date }: IEditProfit) => {
   const { id: profitId } = await prisma.profit.upsert({
     where: { userId_date: { date, userId } },
     create: { date, userId },

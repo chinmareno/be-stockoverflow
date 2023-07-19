@@ -182,41 +182,48 @@ const decreaseItemQuantity = async ({
     select: { id: true },
   });
 
-  const { id: itemNameId } = await prisma.itemName.upsert({
+  const { id: itemNameId, name: selectedName } = await prisma.itemName.upsert({
     where: { name_itemListId: { itemListId, name } },
     create: { name, itemListId },
     update: {},
-    select: { id: true },
+    select: { id: true, name: true },
   });
-  const { id: itemTypeId } = await prisma.itemType.upsert({
+  const { id: itemTypeId, type: selectedType } = await prisma.itemType.upsert({
     where: { type_itemNameId: { itemNameId, type } },
     create: { type, itemNameId },
     update: {},
-    select: { id: true },
+    select: { id: true, type: true },
   });
 
   let selectedItem = await prisma.itemLength.findFirst({
     where: { itemTypeId, length },
   });
-
   let quantityNeeded = quantity;
+  const productNameTypeTotalCost = [];
   while (selectedItem.quantity < quantityNeeded) {
-    await prisma.itemLength.delete({ where: { id: selectedItem.id } });
+    const { cost, quantity } = await prisma.itemLength.delete({
+      where: { id: selectedItem.id },
+    });
+    productNameTypeTotalCost.push({ totalCost: cost * quantity });
     quantityNeeded -= selectedItem.quantity;
     selectedItem = await prisma.itemLength.findFirst({
       where: { itemTypeId, length },
     });
   }
   if (selectedItem.quantity == quantityNeeded) {
-    await prisma.itemLength.delete({
+    const { cost, quantity } = await prisma.itemLength.delete({
       where: { id: selectedItem.id },
     });
-    return;
+    productNameTypeTotalCost.push({ totalCost: cost * quantity });
+
+    return productNameTypeTotalCost;
   }
-  await prisma.itemLength.update({
+  const { cost } = await prisma.itemLength.update({
     where: { id: selectedItem.id },
     data: { quantity: selectedItem.quantity - quantityNeeded },
   });
+  productNameTypeTotalCost.push({ totalCost: cost * quantityNeeded });
+  return productNameTypeTotalCost;
 };
 
 export {
