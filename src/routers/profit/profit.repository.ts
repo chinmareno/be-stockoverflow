@@ -22,6 +22,13 @@ export interface IGetProfileByMonth {
   userId: string;
 }
 
+interface IDecreaseProfit {
+  date: string;
+  userId: string;
+  totalPrice: number;
+  profitItem: ProfitItem;
+}
+
 const getProfitByMonth = async ({ date, userId }: IGetProfileByMonth) => {
   return await prisma.profit.findUnique({
     where: { userId_date: { date, userId } },
@@ -46,6 +53,33 @@ const addProfit = async ({
     create: { name, totalProfit: totalProfit - totalCost, type, profitId },
     update: { totalProfit: { increment: totalProfit - totalCost } },
   });
+  return totalProfit - totalCost;
+};
+
+const decreaseProfit = async ({
+  userId,
+  date,
+  totalPrice,
+  profitItem,
+}: IDecreaseProfit) => {
+  const { id } = await prisma.profit.findUnique({
+    where: { userId_date: { date, userId } },
+  });
+  const { profitId, name, type, totalProfit } = await prisma.profitItem.update({
+    where: {
+      profitId_name_type: {
+        name: profitItem.name,
+        type: profitItem.type,
+        profitId: id,
+      },
+    },
+    data: { totalProfit: { decrement: totalPrice } },
+  });
+  if (totalProfit == 0) {
+    await prisma.profitItem.delete({
+      where: { profitId_name_type: { name, profitId, type } },
+    });
+  }
 };
 
 const getAllProfit = async () => {
@@ -59,11 +93,22 @@ const editProfit = async ({ profitItem, userId, date }: IEditProfit) => {
     update: {},
   });
   const { name, totalProfit, type } = profitItem;
-  await prisma.profitItem.upsert({
+  const { id, totalProfit: afterTotalProfit } = await prisma.profitItem.upsert({
     where: { profitId_name_type: { name, profitId, type } },
     create: { name, totalProfit: Number(totalProfit), type, profitId },
     update: { totalProfit: Number(totalProfit) },
   });
+  if (afterTotalProfit == 0) {
+    await prisma.profitItem.delete({
+      where: { profitId_name_type: { name, profitId: id, type } },
+    });
+  }
 };
 
-export { addProfit, editProfit, getProfitByMonth, getAllProfit };
+export {
+  addProfit,
+  editProfit,
+  getProfitByMonth,
+  getAllProfit,
+  decreaseProfit,
+};

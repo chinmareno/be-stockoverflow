@@ -6,15 +6,21 @@ import {
   getInvoiceByDate,
   getUnpaidInvoicesByUserId,
   updatePaidStatus,
+  createInvoiceHistory,
+  getInvoiceHistory,
 } from "./invoice.repository.js";
-import { costSchema, userIdSchema } from "../items/items.service.js";
+import {
+  costSchema,
+  createProduct,
+  userIdSchema,
+} from "../items/items.service.js";
 import { BadRequestError } from "../../errors/index.js";
 import { IGetInvoiceByDate } from "./invoice.repository.js";
 import {
   decreaseItemQuantity,
   updateSellerByUserId,
 } from "../items/items.repository.js";
-import { addProfit } from "../profit/profit.repository.js";
+import { addProfit, decreaseProfit } from "../profit/profit.repository.js";
 
 const idSchema = Joi.string().required();
 const buyerSchema = Joi.string().required();
@@ -93,7 +99,7 @@ const makeInvoice = async ({
   }
 
   await updateSellerByUserId({ userId, seller });
-  await createInvoice({
+  const { id } = await createInvoice({
     userId,
     buyer,
     seller,
@@ -116,11 +122,23 @@ const makeInvoice = async ({
         (acc, curr) => curr.totalCost + acc,
         0
       );
-      await addProfit({
+      const totalProfit = await addProfit({
         date: date.slice(3),
         userId,
         profitItem,
         totalCost: totalCostReduced,
+      });
+      await createInvoiceHistory({
+        invoiceId: id,
+        length: Number(length),
+        name,
+        price: Number(price),
+        quantity: Number(quantity),
+        type,
+        userId,
+        totalProfit,
+
+        date: date.slice(3),
       });
     })
   );
@@ -135,6 +153,29 @@ const removeInvoice = async ({ id, userId }: IDeleteInvoice) => {
   if (userIdError) {
     throw new BadRequestError("incorrect user id format :" + userId);
   }
+  const invoiceHistory = await getInvoiceHistory({ invoiceId: id, userId });
+  await Promise.all(
+    invoiceHistory.map(
+      async ({ length, name, price, quantity, type, date, totalProfit }) => {
+        await createProduct({
+          cost: price,
+          editStock: false,
+          length,
+          name,
+          quantity,
+          type,
+          userId,
+        });
+        await decreaseProfit({
+          date,
+          profitItem: { name, type, totalProfit },
+          totalPrice: totalProfit,
+          userId,
+        });
+      }
+    )
+  );
+
   return await deleteInvoice({ id, userId });
 };
 

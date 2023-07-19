@@ -204,7 +204,14 @@ const decreaseItemQuantity = async ({
     const { cost, quantity } = await prisma.itemLength.delete({
       where: { id: selectedItem.id },
     });
-    productNameTypeTotalCost.push({ totalCost: cost * quantity });
+    productNameTypeTotalCost.push({
+      totalCost: cost * quantity,
+      name,
+      type,
+      length,
+      cost,
+      quantity,
+    });
     quantityNeeded -= selectedItem.quantity;
     selectedItem = await prisma.itemLength.findFirst({
       where: { itemTypeId, length },
@@ -214,7 +221,14 @@ const decreaseItemQuantity = async ({
     const { cost, quantity } = await prisma.itemLength.delete({
       where: { id: selectedItem.id },
     });
-    productNameTypeTotalCost.push({ totalCost: cost * quantity });
+    productNameTypeTotalCost.push({
+      totalCost: cost * quantity,
+      name,
+      type,
+      length,
+      cost,
+      quantity,
+    });
 
     return productNameTypeTotalCost;
   }
@@ -222,7 +236,14 @@ const decreaseItemQuantity = async ({
     where: { id: selectedItem.id },
     data: { quantity: selectedItem.quantity - quantityNeeded },
   });
-  productNameTypeTotalCost.push({ totalCost: cost * quantityNeeded });
+  productNameTypeTotalCost.push({
+    totalCost: cost * quantityNeeded,
+    name,
+    type,
+    length,
+    cost,
+    quantity,
+  });
   return productNameTypeTotalCost;
 };
 

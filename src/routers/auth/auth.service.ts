@@ -30,6 +30,7 @@ interface IUserData {
 interface IUserProfile {
   username: string;
   image: string;
+  seller: string;
 }
 
 export interface IEditAccount {
@@ -100,16 +101,14 @@ const editAccount = async ({ userId, username, password }: IEditAccount) => {
   }
 };
 
-const getUserProfile = async (
-  userId: string
-): Promise<{ username: string; image: string }> => {
+const getUserProfile = async (userId: string) => {
   const { error } = userIdSchema.validate(userId);
   if (error) {
     throw new BadRequestError("Invalid user id format");
   }
   const user = await findUserById(userId);
-  const { username, image } = user as IUserProfile;
-  return { username, image };
+  const { username, image, seller } = user as IUserProfile;
+  return { username, image, seller };
 };
 
 const getUserTheme = async (userId: string) => {

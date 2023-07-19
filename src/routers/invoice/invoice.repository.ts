@@ -24,6 +24,24 @@ export interface IDeleteInvoice {
   id: string;
   userId: string;
 }
+
+interface ICreateInvoiceHistory {
+  userId: string;
+  invoiceId: string;
+  name: string;
+  type: string;
+  length: number;
+  price: number;
+  quantity: number;
+  date: string;
+  totalProfit: number;
+}
+
+interface IGetInvoiceHistory {
+  userId: string;
+  invoiceId: string;
+}
+
 const createInvoice = async ({
   userId,
   date,
@@ -33,7 +51,7 @@ const createInvoice = async ({
   totalPrice,
   paidStatus,
 }: ICreateInvoice) => {
-  const { id: invoiceId } = await prisma.invoice.create({
+  const invoice = await prisma.invoice.create({
     data: {
       userId,
       date,
@@ -46,7 +64,7 @@ const createInvoice = async ({
   await prisma.invoiceItem.createMany({
     data: invoiceItem.map(({ name, type, length, price, quantity }) => {
       return {
-        invoiceId,
+        invoiceId: invoice.id,
         userId,
         name,
         type,
@@ -56,6 +74,7 @@ const createInvoice = async ({
       };
     }),
   });
+  return invoice;
 };
 
 const getAllInvoice = async (userId: string) => {
@@ -95,15 +114,51 @@ const getInvoiceByDate = async ({ userId, date }: IGetInvoiceByDate) => {
   return invoices;
 };
 
+const createInvoiceHistory = async ({
+  invoiceId,
+  length,
+  name,
+  price,
+  quantity,
+  type,
+  userId,
+  date,
+  totalProfit,
+}: ICreateInvoiceHistory) => {
+  await prisma.invoiceHistory.create({
+    data: {
+      invoiceId,
+      length,
+      name,
+      price,
+      quantity,
+      type,
+      userId,
+      date,
+      totalProfit,
+    },
+  });
+};
+
+const getInvoiceHistory = async ({ invoiceId, userId }: IGetInvoiceHistory) => {
+  const invoiceHistory = await prisma.invoiceHistory.findMany({
+    where: { invoiceId, userId },
+  });
+  await prisma.invoiceHistory.deleteMany({ where: { userId, invoiceId } });
+  return invoiceHistory;
+};
+
 const deleteInvoice = async ({ id, userId }: IDeleteInvoice) => {
   await prisma.invoice.delete({ where: { id_userId: { id, userId } } });
 };
 
 export {
+  createInvoiceHistory,
   createInvoice,
   getInvoiceByDate,
   deleteInvoice,
   getAllInvoice,
   getUnpaidInvoicesByUserId,
   updatePaidStatus,
+  getInvoiceHistory,
 };

@@ -67,6 +67,18 @@ model Invoice {
  @@unique([id,userId])
 }
  
+ model InvoiceHistory {
+  id          String    @id @default(cuid())
+  userId String
+invoiceId String
+name String
+type String
+price Int
+totalProfit Int
+length Int
+date String
+quantity Int
+ }
  
 
 model InvoiceItem{
