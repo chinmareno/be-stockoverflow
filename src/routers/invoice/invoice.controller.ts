@@ -22,6 +22,16 @@ router.get("/", async (req: AuthRequest, res, next) => {
   }
 });
 
+router.get("/unpaid", async (req: AuthRequest, res, next) => {
+  try {
+    const userId = req.userId as string;
+    const unpaidInvoices = await getUnpaidInvoices(userId);
+    res.status(200).send(unpaidInvoices);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/:date", async (req: AuthRequest, res, next) => {
   try {
     const date = req.params.date;
@@ -34,15 +44,6 @@ router.get("/:date", async (req: AuthRequest, res, next) => {
   }
 });
 
-router.get("/unpaid", async (req: AuthRequest, res, next) => {
-  try {
-    const userId = req.userId as string;
-    const unpaidInvoices = await getUnpaidInvoices(userId);
-    res.status(200).send(unpaidInvoices);
-  } catch (error) {
-    next(error);
-  }
-});
 router.post("/", async (req: AuthRequest, res, next) => {
   try {
     const userId = req.userId as string;

@@ -103,9 +103,16 @@ const makeInvoice = async ({
     paidStatus,
   });
   await Promise.all(
-    invoiceItem.map(async ({ name, price, quantity, type }) => {
+    invoiceItem.map(async ({ name, price, quantity, type, length }) => {
       const profitItem = { name, type, totalProfit: price * quantity };
       await addProfit({ date: date.slice(3), userId, profitItem });
+      await decreaseItemQuantity({
+        length: Number(length),
+        name,
+        quantity,
+        type,
+        userId,
+      });
     })
   );
 };
