@@ -91,7 +91,10 @@ router.post(
         res.clearCookie(cookieName);
       }
       const token = createToken(user.id);
-      res.cookie(cookieName, token).status(201).send("Login Success");
+      res
+        .cookie(cookieName, token, { httpOnly: true, secure: true })
+        .status(201)
+        .send("Login Success");
     } catch (err) {
       next(err);
     }
