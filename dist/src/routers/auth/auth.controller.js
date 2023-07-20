@@ -52,7 +52,7 @@ router.post("/signup", (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         const user = yield signup(userData);
         const token = createToken(user.id);
         res
-            .cookie(cookieName, token)
+            .cookie(cookieName, token, { httpOnly: true, secure: true })
             .status(201)
             .send("Account created successfully");
     }
