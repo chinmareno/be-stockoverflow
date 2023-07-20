@@ -13,6 +13,6 @@
     "moduleResolution": "node",
     "sourceMap": true
   },
-  "include": ["src/**/*", "app.ts"],
+  "include": ["src/**/*", "app.ts,images/*"],
   "exclude": ["node_modules"]
 }
