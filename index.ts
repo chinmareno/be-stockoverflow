@@ -90,8 +90,8 @@ app.get("/cek", (req: Request, res: Response): void => {
 
 app.use("/", router);
 
-// const server: Server = app.listen(PORT, () => {
-//   console.log(`Server is berlari on port ${PORT}`);
-// });
+const server: Server = app.listen(PORT, () => {
+  console.log(`Server is berlari on port ${PORT}`);
+});
 
 export default app;
