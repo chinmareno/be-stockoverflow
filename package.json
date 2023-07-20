@@ -19,7 +19,7 @@
     "node": "v18.16.0"
   },
   "dependencies": {
-    "@prisma/client": "^4.16.1",
+    "@prisma/client": "^5.0.0",
     "@types/multer": "^1.4.7",
     "bcrypt": "^5.1.0",
     "cookie-parser": "~1.4.4",
