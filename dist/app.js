@@ -2,7 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
-import { router } from "./routers/index.js";
+import { router } from "./src/routers/index.js";
 import { config } from "dotenv";
 import rateLimit from "express-rate-limit";
 import bodyparser from "body-parser";
