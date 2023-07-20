@@ -17,7 +17,7 @@ import {
 } from "./auth.service.js";
 import { errorHandler } from "../../middleware/errorHandler.js";
 import prisma from "../../configs/db.js";
-import { __dirname } from "../../../index.js";
+import { __dirname } from "../../app.js";
 import fs from "fs";
 
 const router = express.Router();

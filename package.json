@@ -8,7 +8,8 @@
     "build": "rimraf dist && tsc",
     "ts.check": "tsc --project tsconfig.json",
     "add-build": "git add dist",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "vercel-build": "echo heelo"
   },
   "pre-commit": [
     "ts.check",

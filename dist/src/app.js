@@ -2,7 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
-import { router } from "./src/routers/index.js";
+import { router } from "./routers/index.js";
 import { config } from "dotenv";
 import rateLimit from "express-rate-limit";
 import bodyparser from "body-parser";
@@ -64,4 +64,4 @@ const server = app.listen(PORT, () => {
     console.log(`Server is berlari on port ${PORT}`);
 });
 export default app;
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=app.js.map
