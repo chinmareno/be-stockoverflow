@@ -8,7 +8,8 @@
     "build": "rimraf dist && npx prisma generate && tsc",
     "ts.check": "tsc --project tsconfig.json",
     "add-build": "git add dist",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "vercel-build": "npx prisma generate && npx prisma migrate deploy"
   },
   "pre-commit": [
     "ts.check",
