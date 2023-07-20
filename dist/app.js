@@ -11,6 +11,10 @@ import { fileURLToPath } from "url";
 import path from "path";
 config();
 const app = express();
+app.use(cors({
+    origin: "https://stockoverflows.vercel.app",
+    credentials: true,
+}));
 const limiter = rateLimit({
     windowMs: 1000,
     max: 20,
@@ -38,10 +42,6 @@ const fileFilter = (req, file, callback) => {
         callback(null, false);
     }
 };
-app.use(cors({
-    origin: "https://stockoverflows.vercel.app",
-    credentials: true,
-}));
 app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 app.use("/images", express.static(path.join(__dirname, "images")));

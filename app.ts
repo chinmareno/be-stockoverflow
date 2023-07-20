@@ -15,6 +15,13 @@ config();
 
 const app: Application = express();
 
+app.use(
+  cors({
+    origin: "https://stockoverflows.vercel.app",
+    credentials: true,
+  })
+);
+
 const limiter = rateLimit({
   windowMs: 1000,
   max: 20,
@@ -50,13 +57,6 @@ const fileFilter = (
     callback(null, false);
   }
 };
-
-app.use(
-  cors({
-    origin: "https://stockoverflows.vercel.app",
-    credentials: true,
-  })
-);
 
 app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
