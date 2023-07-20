@@ -51,6 +51,12 @@ const fileFilter = (
   }
 };
 
+app.use(
+  cors({
+    origin: process.env.ORIGIN,
+    credentials: true,
+  })
+);
 app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 app.use("/images", express.static(path.join(__dirname, "public")));
@@ -70,12 +76,6 @@ app.use(
 );
 
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: process.env.ORIGIN,
-    credentials: true,
-  })
-);
 
 app.get("/cek", (req: Request, res: Response): void => {
   res.send("iyaa awokoawk");
