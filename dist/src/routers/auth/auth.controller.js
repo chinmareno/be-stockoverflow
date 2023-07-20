@@ -14,7 +14,7 @@ import { findAll } from "./auth.repository.js";
 import { changeImage, changeTheme, editAccount, getUserProfile, getUserTheme, login, signup, } from "./auth.service.js";
 import { errorHandler } from "../../middleware/errorHandler.js";
 import prisma from "../../configs/db.js";
-import { __dirname } from "../../../app.js";
+import { __dirname } from "../../../index.js";
 import fs from "fs";
 const router = express.Router();
 const cookieName = process.env.COOKIE_NAME;

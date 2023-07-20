@@ -38,6 +38,10 @@ const fileFilter = (req, file, callback) => {
         callback(null, false);
     }
 };
+app.use(cors({
+    origin: process.env.ORIGIN,
+    credentials: true,
+}));
 app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 app.use("/images", express.static(path.join(__dirname, "images")));
@@ -52,10 +56,6 @@ app.use(helmet({
     crossOriginResourcePolicy: false,
 }));
 app.use(cookieParser());
-app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-}));
 app.get("/cek", (req, res) => {
     res.send("iyaa awokoawk");
 });
@@ -63,4 +63,5 @@ app.use("/", router);
 const server = app.listen(PORT, () => {
     console.log(`Server is berlari on port ${PORT}`);
 });
-//# sourceMappingURL=app.js.map
+export default app;
+//# sourceMappingURL=index.js.map
