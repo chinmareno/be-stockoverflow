@@ -15,6 +15,9 @@
     "build",
     "add-build"
   ],
+  "engines": {
+    "node": "v18.16.0"
+  },
   "dependencies": {
     "@prisma/client": "^4.16.1",
     "@types/multer": "^1.4.7",
