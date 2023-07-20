@@ -53,7 +53,7 @@ const fileFilter = (
 
 app.use(
   cors({
-    origin: process.env.ORIGIN,
+    origin: "https://stockoverflows.vercel.app",
     credentials: true,
   })
 );

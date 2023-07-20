@@ -39,7 +39,7 @@ const fileFilter = (req, file, callback) => {
     }
 };
 app.use(cors({
-    origin: process.env.ORIGIN,
+    origin: "https://stockoverflows.vercel.app",
     credentials: true,
 }));
 app.use(bodyparser.urlencoded({ extended: true }));
