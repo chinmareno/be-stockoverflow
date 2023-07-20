@@ -5,6 +5,10 @@
       "src": "/index.ts",
       "use": "@vercel/node",
       "config": { "includeFiles": ["dist/**"] }
+    },
+    {
+      "src": "prisma",
+      "use": "@prisma/cli"
     }
   ],
   "routes": [
