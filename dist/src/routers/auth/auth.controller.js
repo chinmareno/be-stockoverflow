@@ -52,7 +52,7 @@ router.post("/signup", (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         const user = yield signup(userData);
         const token = createToken(user.id);
         res
-            .cookie(cookieName, token, { domain: "be-stockoverflows.vercel.app" })
+            .cookie(cookieName, token, { domain: ".vercel.app" })
             .status(201)
             .send("Account created successfully");
     }
@@ -70,8 +70,7 @@ router.post("/login", (req, res, next) => __awaiter(void 0, void 0, void 0, func
         const token = createToken(user.id);
         res
             .cookie(cookieName, token, {
-            domain: "be-stockoverflows.vercel.app",
-            sameSite: "none",
+            domain: ".vercel.app",
         })
             .status(201)
             .send("Login Success");
