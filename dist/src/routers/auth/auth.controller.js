@@ -119,4 +119,5 @@ router.patch("/change-theme", authMiddleware, (req, res, next) => __awaiter(void
 router.use(errorHandler);
 const userController = router;
 export { userController };
+//test
 //# sourceMappingURL=auth.controller.js.map
