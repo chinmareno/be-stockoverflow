@@ -12,7 +12,7 @@ import path from "path";
 config();
 const app = express();
 app.use(cors({
-    origin: ["https://stockoverflows.vercel.app", "http://localhost:5173"],
+    origin: "https://stockoverflows.vercel.app",
     credentials: true,
 }));
 const limiter = rateLimit({
