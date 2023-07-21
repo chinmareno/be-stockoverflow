@@ -72,7 +72,11 @@ router.post(
       const user = await signup(userData);
       const token = createToken(user.id);
       res
-        .cookie(cookieName, token, { domain: ".vercel.app" })
+        .cookie(cookieName, token, {
+          domain: ".vercel.app",
+          sameSite: "none",
+          path: "/",
+        })
         .status(201)
         .send("Account created successfully");
     } catch (err) {
@@ -94,6 +98,8 @@ router.post(
       res
         .cookie(cookieName, token, {
           domain: ".vercel.app",
+          sameSite: "none",
+          path: "/",
         })
         .status(201)
         .send("Login Success");
