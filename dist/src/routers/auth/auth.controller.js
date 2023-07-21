@@ -56,6 +56,7 @@ router.post("/signup", (req, res, next) => __awaiter(void 0, void 0, void 0, fun
             domain: ".vercel.app",
             sameSite: "none",
             path: "/",
+            secure: true,
         })
             .status(201)
             .send("Account created successfully");
@@ -77,6 +78,7 @@ router.post("/login", (req, res, next) => __awaiter(void 0, void 0, void 0, func
             domain: ".vercel.app",
             sameSite: "none",
             path: "/",
+            secure: true,
         })
             .status(201)
             .send("Login Success");

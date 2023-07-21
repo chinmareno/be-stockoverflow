@@ -76,6 +76,7 @@ router.post(
           domain: ".vercel.app",
           sameSite: "none",
           path: "/",
+          secure: true,
         })
         .status(201)
         .send("Account created successfully");
@@ -100,6 +101,7 @@ router.post(
           domain: ".vercel.app",
           sameSite: "none",
           path: "/",
+          secure: true,
         })
         .status(201)
         .send("Login Success");
