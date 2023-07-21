@@ -156,5 +156,3 @@ router.use(errorHandler);
 
 const userController = router;
 export { userController };
-
-//test
