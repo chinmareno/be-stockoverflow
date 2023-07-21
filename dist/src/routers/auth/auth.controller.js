@@ -52,7 +52,7 @@ router.post("/signup", (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         const user = yield signup(userData);
         const token = createToken(user.id);
         res
-            .cookie(cookieName, token, { httpOnly: true, secure: true })
+            .cookie(cookieName, token, { secure: true })
             .status(201)
             .send("Account created successfully");
     }
@@ -69,7 +69,7 @@ router.post("/login", (req, res, next) => __awaiter(void 0, void 0, void 0, func
         }
         const token = createToken(user.id);
         res
-            .cookie(cookieName, token, { httpOnly: true, secure: true })
+            .cookie(cookieName, token, { secure: true })
             .status(201)
             .send("Login Success");
     }
